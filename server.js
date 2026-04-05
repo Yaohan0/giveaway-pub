@@ -6,35 +6,23 @@ const path = require("path");
 const axios = require("axios");
 const nodemailer = require("nodemailer");
 require("dotenv").config();
-app.set("trust proxy", 1);
-
-app.use(
-  session({
-    secret: process.env.SESSION_SECRET,
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      maxAge: 1000 * 60 * 60 * 24 * 7,
-    },
-  })
-);
 
 const app = express();
+
+app.set("trust proxy", 1);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use(
   session({
-    secret: process.env.SESSION_SECRET || "secret123",
+    secret: process.env.SESSION_SECRET || "dev_secret",
     resave: false,
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
-      secure: false,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
       maxAge: 1000 * 60 * 60 * 24 * 7,
     },
   })
@@ -91,7 +79,10 @@ async function verifyTurnstile(token, remoteIp = "") {
 
     return response.data.success === true;
   } catch (err) {
-    console.error("Turnstile verification error:", err.response?.data || err.message);
+    console.error(
+      "Turnstile verification error:",
+      err.response?.data || err.message
+    );
     return false;
   }
 }
@@ -173,7 +164,9 @@ app.post("/api/register", async (req, res) => {
 
       if (secondsSinceLast < 60) {
         return res.status(429).json({
-          error: `Please wait ${60 - secondsSinceLast} seconds before requesting another OTP.`,
+          error: `Please wait ${
+            60 - secondsSinceLast
+          } seconds before requesting another OTP.`,
         });
       }
     }
@@ -233,7 +226,9 @@ app.post("/api/send-email-otp", async (req, res) => {
     );
 
     if (existingUsers.length > 0) {
-      return res.status(400).json({ error: "This email is already registered." });
+      return res
+        .status(400)
+        .json({ error: "This email is already registered." });
     }
 
     const [pendingRows] = await pool.query(
@@ -246,7 +241,9 @@ app.post("/api/send-email-otp", async (req, res) => {
     );
 
     if (pendingRows.length === 0) {
-      return res.status(404).json({ error: "No pending registration found. Please register again." });
+      return res
+        .status(404)
+        .json({ error: "No pending registration found. Please register again." });
     }
 
     const lastCreated = new Date(pendingRows[0].created_at).getTime();
@@ -255,7 +252,9 @@ app.post("/api/send-email-otp", async (req, res) => {
 
     if (secondsSinceLast < 60) {
       return res.status(429).json({
-        error: `Please wait ${60 - secondsSinceLast} seconds before requesting another OTP.`,
+        error: `Please wait ${
+          60 - secondsSinceLast
+        } seconds before requesting another OTP.`,
       });
     }
 
@@ -328,7 +327,9 @@ app.post("/api/verify-email-otp", async (req, res) => {
     );
 
     if (existingUsers.length > 0) {
-      await pool.query("DELETE FROM pending_registrations WHERE id = ?", [pending.id]);
+      await pool.query("DELETE FROM pending_registrations WHERE id = ?", [
+        pending.id,
+      ]);
       return res.status(400).json({ error: "Email already exists." });
     }
 
@@ -338,7 +339,9 @@ app.post("/api/verify-email-otp", async (req, res) => {
       [pending.username, pending.email, pending.password_hash]
     );
 
-    await pool.query("DELETE FROM pending_registrations WHERE id = ?", [pending.id]);
+    await pool.query("DELETE FROM pending_registrations WHERE id = ?", [
+      pending.id,
+    ]);
 
     req.session.user = {
       id: result.insertId,
@@ -348,7 +351,9 @@ app.post("/api/verify-email-otp", async (req, res) => {
       is_verified: 1,
     };
 
-    return res.json({ message: "Email verified and account created successfully." });
+    return res.json({
+      message: "Email verified and account created successfully.",
+    });
   } catch (err) {
     console.error("VERIFY OTP ERROR:", err);
     return res.status(500).json({
@@ -496,7 +501,9 @@ app.post("/api/giveaways/:id/join", requireLogin, async (req, res) => {
     );
 
     if (userRows.length === 0 || userRows[0].is_verified !== 1) {
-      return res.status(403).json({ error: "Please verify your email before joining giveaways." });
+      return res.status(403).json({
+        error: "Please verify your email before joining giveaways.",
+      });
     }
 
     if (req.session.user) {
@@ -587,10 +594,9 @@ app.post("/api/giveaways/:id/draw", requireAdmin, async (req, res) => {
       );
     }
 
-    await pool.query(
-      "UPDATE giveaways SET status = 'ended' WHERE id = ?",
-      [giveawayId]
-    );
+    await pool.query("UPDATE giveaways SET status = 'ended' WHERE id = ?", [
+      giveawayId,
+    ]);
 
     res.json({
       message: "Winners drawn successfully.",
