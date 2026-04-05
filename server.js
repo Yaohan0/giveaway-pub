@@ -6,6 +6,21 @@ const path = require("path");
 const axios = require("axios");
 const nodemailer = require("nodemailer");
 require("dotenv").config();
+app.set("trust proxy", 1);
+
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 1000 * 60 * 60 * 24 * 7,
+    },
+  })
+);
 
 const app = express();
 
