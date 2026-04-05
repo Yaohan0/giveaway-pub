@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Giveaway Platform</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <h1>Giveaway Platform</h1>
+
+    <nav id="mainNav">
+      <a href="index.html">Home</a>
+
+      <span id="guestLinks">
+        <a href="register.html">Register</a>
+        <a href="login.html">Login</a>
+      </span>
+
+      <span id="userLinks" style="display: none;">
+        <a href="create-giveaway.html" id="createGiveawayLink" style="display: none;">Create Giveaway</a>
+        <a href="#" id="logoutNavBtn">Logout</a>
+      </span>
+    </nav>
+  </header>
+
+  <main class="container">
+    <section class="hero">
+      <h2>Live Giveaways</h2>
+      <p>Fair, simple, one entry per account.</p>
+    </section>
+
+    <section>
+      <div id="userBox" class="user-box"></div>
+      <div id="giveawayList" class="card-grid"></div>
+    </section>
+  </main>
+
+  <!-- Edit Giveaway Modal -->
+  <div id="editModal" class="modal hidden">
+    <div class="modal-backdrop" id="modalBackdrop"></div>
+
+    <div class="modal-panel">
+      <div class="modal-header">
+        <h2>Edit Giveaway</h2>
+        <button type="button" class="icon-btn" id="closeModalBtn">&times;</button>
+      </div>
+
+      <form id="editGiveawayForm" class="modal-form">
+        <input type="hidden" id="editGiveawayId" />
+
+        <label for="editTitle">Title</label>
+        <input type="text" id="editTitle" required />
+
+        <label for="editDescription">Description</label>
+        <textarea id="editDescription"></textarea>
+
+        <label for="editPrize">Prize</label>
+        <input type="text" id="editPrize" required />
+
+        <label for="editServerName">Server Name</label>
+        <input type="text" id="editServerName" />
+
+        <label for="editWinnerCount">Winner Count</label>
+        <input type="number" id="editWinnerCount" min="1" required />
+
+        <label for="editStartTime">Start Time</label>
+        <input type="datetime-local" id="editStartTime" required />
+
+        <label for="editEndTime">End Time</label>
+        <input type="datetime-local" id="editEndTime" required />
+
+        <label for="editStatus">Status</label>
+        <select id="editStatus" required>
+          <option value="draft">Draft</option>
+          <option value="live">Live</option>
+          <option value="ended">Ended</option>
+          <option value="cancelled">Cancelled</option>
+        </select>
+
+        <p id="editMsg" class="form-msg"></p>
+
+        <div class="modal-actions">
+          <button type="button" class="secondary-btn" id="cancelEditBtn">Cancel</button>
+          <button type="submit">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

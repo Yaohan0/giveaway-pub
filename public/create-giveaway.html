@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Create Giveaway</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="form-page">
+    <form id="createGiveawayForm" class="form-card">
+      <h2>Create Giveaway</h2>
+
+      <input type="text" id="title" placeholder="Giveaway title" required />
+      <textarea id="description" placeholder="Description"></textarea>
+      <input type="text" id="prize" placeholder="Prize" required />
+      <input type="text" id="server_name" placeholder="Server name" />
+      <input type="number" id="winner_count" placeholder="Winner count" min="1" value="1" required />
+      <label>Start time</label>
+      <input type="datetime-local" id="start_time" required />
+      <label>End time</label>
+      <input type="datetime-local" id="end_time" required />
+
+      <select id="status">
+        <option value="draft">Draft</option>
+        <option value="live">Live</option>
+      </select>
+
+      <button type="submit">Create Giveaway</button>
+      <p id="msg"></p>
+    </form>
+  </main>
+
+  <script>
+    const form = document.getElementById("createGiveawayForm");
+    const msg = document.getElementById("msg");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const body = {
+        title: document.getElementById("title").value.trim(),
+        description: document.getElementById("description").value.trim(),
+        prize: document.getElementById("prize").value.trim(),
+        server_name: document.getElementById("server_name").value.trim(),
+        winner_count: document.getElementById("winner_count").value,
+        start_time: document.getElementById("start_time").value.replace("T", " "),
+        end_time: document.getElementById("end_time").value.replace("T", " "),
+        status: document.getElementById("status").value
+      };
+
+      const res = await fetch("/api/giveaways", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body)
+      });
+
+      const data = await res.json();
+      msg.textContent = data.message || data.error;
+    });
+  </script>
+</body>
+</html>

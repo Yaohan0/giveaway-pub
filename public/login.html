@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="form-page">
+    <form id="loginForm" class="form-card">
+      <div class="auth-top-links">
+        <a href="index.html">&larr; Back to Home</a>
+      </div>
+
+      <h2>Login</h2>
+
+      <input type="email" id="email" placeholder="Email" required />
+      <input type="password" id="password" placeholder="Password" required />
+
+      <button type="submit">Login</button>
+      <p id="msg"></p>
+
+      <p class="auth-switch">
+        Don’t have an account?
+        <a href="register.html">Register here</a>
+      </p>
+    </form>
+  </main>
+
+  <script>
+    const form = document.getElementById("loginForm");
+    const msg = document.getElementById("msg");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const body = {
+        email: document.getElementById("email").value.trim(),
+        password: document.getElementById("password").value
+      };
+
+      try {
+        const res = await fetch("/api/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body)
+        });
+
+        const data = await res.json();
+        msg.textContent = data.message || data.error || "Something went wrong.";
+
+        if (res.ok) {
+          window.location.href = "/";
+        }
+      } catch (err) {
+        console.error(err);
+        msg.textContent = "Login failed.";
+      }
+    });
+  </script>
+</body>
+</html>

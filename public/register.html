@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Register</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="form-page">
+    <form id="registerForm" class="form-card">
+      <div class="auth-top-links">
+        <a href="index.html">&larr; Back to Home</a>
+      </div>
+
+      <h2>Register</h2>
+
+      <input type="text" id="username" placeholder="Username" required />
+      <input type="email" id="email" placeholder="Email" required />
+      <input type="password" id="password" placeholder="Password" required />
+
+      <div id="turnstile-container"></div>
+
+      <button type="submit" id="registerBtn">Create Account</button>
+
+      <p id="msg"></p>
+
+      <p class="auth-switch">
+        Already have an account?
+        <a href="login.html">Login here</a>
+      </p>
+    </form>
+  </main>
+
+  <script>
+    let turnstileWidgetId = null;
+    let captchaToken = "";
+
+    const msg = document.getElementById("msg");
+    const registerForm = document.getElementById("registerForm");
+    const registerBtn = document.getElementById("registerBtn");
+
+    function setMessage(text, isError = false) {
+      msg.textContent = text;
+      msg.style.color = isError ? "#fca5a5" : "#d1fae5";
+    }
+
+    function resetCaptcha() {
+      captchaToken = "";
+      if (window.turnstile && turnstileWidgetId !== null) {
+        turnstile.reset(turnstileWidgetId);
+      }
+    }
+
+    function onTurnstileSuccess(token) {
+      captchaToken = token;
+      setMessage("");
+    }
+
+    function onTurnstileError() {
+      captchaToken = "";
+      setMessage("Captcha failed to load. Refresh the page.", true);
+    }
+
+    function onTurnstileExpired() {
+      captchaToken = "";
+      setMessage("Captcha expired. Please complete it again.", true);
+    }
+
+    function renderTurnstile() {
+      const container = document.getElementById("turnstile-container");
+
+      if (!window.turnstile || !container) {
+        setMessage("Captcha script did not load. Refresh the page.", true);
+        return;
+      }
+
+      container.innerHTML = "";
+
+      turnstileWidgetId = turnstile.render("#turnstile-container", {
+        sitekey: "0x4AAAAAACz9QeGed4W2dmn5",
+        theme: "dark",
+        callback: onTurnstileSuccess,
+        "error-callback": onTurnstileError,
+        "expired-callback": onTurnstileExpired
+      });
+    }
+
+    window.onloadTurnstileCallback = function () {
+      renderTurnstile();
+    };
+
+    registerForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const username = document.getElementById("username").value.trim();
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value;
+
+      if (!username || !email || !password) {
+        setMessage("Please fill in all fields.", true);
+        return;
+      }
+
+      if (!captchaToken) {
+        setMessage("Please complete the captcha.", true);
+        return;
+      }
+
+      registerBtn.disabled = true;
+      setMessage("Creating account...");
+
+      try {
+        const res = await fetch("/api/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            username,
+            email,
+            password,
+            captchaToken
+          })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          setMessage(data.error || "Registration failed.", true);
+          resetCaptcha();
+          return;
+        }
+
+        setMessage(data.message || "Account created.");
+        setTimeout(() => {
+          window.location.href = `verify-email.html?email=${encodeURIComponent(email)}`;
+        }, 500);
+      } catch (err) {
+        console.error(err);
+        setMessage("Registration failed.", true);
+        resetCaptcha();
+      } finally {
+        registerBtn.disabled = false;
+      }
+    });
+  </script>
+
+  <script
+    src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onloadTurnstileCallback&render=explicit"
+    async
+    defer
+  ></script>
+</body>
+</html>
