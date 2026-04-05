@@ -1,1 +1,13 @@
 Recovery Code For Twilio = Y885SMGP3UWTN11N8US44DRB
+
+
+
+SESSION_SECRET=my_super_secret_123456789
+EMAIL_USER=yaohanyt@gmail.com
+EMAIL_PASS=fsytytggazaaqwzr
+TURNSTILE_SECRET=0x4AAAAAACz9QcKjBrCXE0JyoyO_xipANQM
+NODE_ENV=production
+DB_HOST=localhost
+DB_USER=SYSDBA
+DB_PASSWORD=masterkey
+DB_NAME=giveaway_platform
